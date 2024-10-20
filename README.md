@@ -35,8 +35,11 @@ library("e1071")
 library("sf")
 
 ```
+Now that we’ve installed the proper packages, we can read in our data. In general, when working in R file organization is highly important. It is a good idea to have any files/datasets you will be using in one folder. You can then set this folder as your working directory using the setwd(“folder address on your computer”) function, as seen below. A working directory acts as a home base for your project. R will look for files you call, and save any outputs you may create using your working directory.
 
-Describe reading in files and setting a working directory/what it is.. also talk about: what files are we reading?
+For this analysis we will be using a .csv file containing the 2016 census attribute data. 
+You can read the csv easily using the read.csv() function. While this file has information on each census tract and category, it does not have any spatial information. 
+The second file is an .shp file containing census tract boundaries. For this file, the st_read() function will be used. This will serve as the spatial component we need for this analysis to continue. 
 
 ```{r Read in data, echo=TRUE, eval=TRUE, warning=FALSE}
 #Set Working Directory 
