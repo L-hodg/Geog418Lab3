@@ -7,12 +7,16 @@ This tutorial will walk you through performing a spatial autocorrelation analysi
 
 For context, spatial autocorrelation (SAC) is a metric used in spatial analysis to describe the relationship between an object and the distribution of nearby features (Gedamu et. al., 2024). Similar to other spatial analysis techniques, it aims to determine if a distribution of data is clustered, dispersed or random. Positive SAC refers to the tendency of features that are close together to have similar attributes. In this case, the result would be a clustered distribution. Conversely, negative SAC would refer to nearby features being dissimilar from each other, resulting in a dispersed distribution. Below is a visual example of SAC. 
 
-IMAGE
+
+
+
 Figure 1: Visual depiction of spatial autocorrelation created by ESRI n.d.
 
-The presence of SAC can have important implications for spatial analysis. While there are multiple ways to quantify SAC, we will be using a technique called Moran's I. This is a statistical measure which will give us a concrete, standardized value to make an appropriate conclusion about the presence of SAC, or lack thereof. For this exercise, we will be examining census data from 2016 in the St. John's area. Although census tract data can provide a wealth of different information, we will be focusing on two variables: Income, and respondents with knowledge of the French Language. Our objective will be to determine whether SAC is present in St. John's for our selected variables. Census data is ideal for this type of analysis, as positive SAC is often found when examining data pertaining to demographics (Li et al., 2012). It is often an appropriate choice because??????? 
+The presence of SAC can have important implications for spatial analysis. While there are multiple ways to quantify SAC, we will be using a technique called Moran's I. This is a statistical measure which will give us a concrete, standardized value to make an appropriate conclusion about the presence of SAC, or lack thereof. For this exercise, we will be examining census data from 2016 in the St. John's area. Although census tract data can provide a wealth of different information, we will be focusing on two variables: Median total income, and respondents with knowledge of the french language. When looking at income, it is important to use the median as results can be skewed by the extremely wealthy. Our objective will be to determine whether SAC is present in St. John's for our selected variables. Census data is ideal for this type of analysis, as positive SAC is often found when examining data pertaining to demographics (Li et al., 2012). It is often an appropriate choice because??????? 
 
-Our first step is to install the appropriate packages for this analysis. Packages are sets of additional functions and commands that can be installed through r onto your machine. These can allow you to broaden the scope of your analysis, or create better maps and figures. Each package that you install can be called into use through the library function. Libraries are the tool that allows you to call on and utilize the functions in the package. 
+Our first step is to install the appropriate packages for this analysis. Packages are sets of additional functions and commands that can be <img width="544" alt="Screenshot 2024-10-19 at 5 21 43 PM" src="https://github.com/user-attachments/assets/20d2e9ce-4f51-4ac5-81d3-88fa480048a0">
+<img width="544" alt="Screenshot 2024-10-19 at 5 21 43 PM" src="https://github.com/user-attachments/assets/3bbbbc4f-8dfb-425e-bd89-7c8152c21201">
+installed through r onto your machine. These can allow you to broaden the scope of your analysis, or create better maps and figures. Each package that you install can be called into use through the library function. Libraries are the tool that allows you to call on and utilize the functions in the package. 
 
 To ensure all steps of this code function properly, install the following packages if not already installed: 
 ```{r Libraries, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
@@ -39,9 +43,9 @@ Now that we’ve installed the proper packages, we can read in our data. In gene
 
 For this analysis we will be using a .csv file containing the 2016 census attribute data. 
 You can read the csv easily using the read.csv() function. While this file has all the required information about our selected variables across each census tract, it does not have any spatial coordinates, meaning we cannot map this file alone. 
-The second file is an .shp file containing census tract boundaries. For this file, the 'st_read()' function will be used. This will serve as the spatial component we need for this analysis to continue. 
+The second file is an .shp file containing census tract boundaries. For this file, the 'st_read()' function from the 'sf' package will be used. This will serve as the spatial component we need for this analysis to continue. 
 
-It is important to consider that the extent of both these datasets concerns all of Canada. Since we will be focusing our analysis on the city of St. John's, it is important to set an appropriate projection. This will ensure that our map outputs generate without any unwanted distortion. To do this we will create a new dataframe for our spatial data, and use the 'st_transform()' function to change the projection of our shapefile. The Coordinate Reference System (CRS) we will be using is CRS:3761, which is a specific NAD83 projection for Newfoundland & Labrador.
+It is important to consider that the extent of both these datasets concerns all of Canada. Since we will be focusing our analysis on the city of St. John's, it is important to set an appropriate projection. This will ensure that our map outputs generate without any unwanted distortion. To do this we will create a new object for our spatial data, and use the 'st_transform()' function from 'sf' to change the projection of our shapefile. The Coordinate Reference System (CRS) we will be using is CRS:3761, which is a specific NAD83 projection for Newfoundland & Labrador.
 
 ```{r Read in data, echo=TRUE, eval=TRUE, warning=FALSE}
 #Set Working Directory 
@@ -55,20 +59,12 @@ shp = st_read("/Users/liam/Desktop/Geog418/Lab3/Assignment3_Data/lda_000a16a_e.s
 stjohns = st_transform(shp, crs=3761)
 
 ```
-discuss/explain:
-- cleaning data
-- removing unwanted rows
-- merging this with the spatial data
-- subset for st johns
-- turn absolute count data into a rate/percent
 
 This next chunk of code will focus on cleaning data, merging the .csv and the spatial data, and subsetting the extent to St. Johns. Currently the census data does not have informative column names, making it hard to identify and call on certain variables. To remedy this, make a new object containing a list of column names (ensure these are in the correct order). We can then apply this list to our csv by setting 'colnames(csv)' equal to the list. 
 
-Census data is unique in that each observation is complete with a GEOUID. This number essentially ties the obsersvation to a specific census tract location. We will create an additional column 'len' using 'nchar()', which counts the number of characters per ID. Using '$' after an object name allows you to reference a specific column. We will see more of this later. Observations with less than 8 characters are missing a dissemenation area, making them incomplete. These will be removed by subsetting our csv to only include rows where 'len' is equal to 8.
+Census data is unique in that each observation is complete with a GEOUID. This number essentially ties the observation to a specific census tract location. We will create an additional column 'len' using 'nchar()', which counts the number of characters per ID. Using '$' after an object name allows you to reference a specific column. We will see more of this later. Observations with less than 8 characters are missing a dissemination area, making them incomplete. These will be removed by subsetting our csv to only include rows where 'len' is equal to 8.
 
-Now that our census data has been cleaned and correctly labelled, we can merge it with the census tract map. We will use 'merge()' function. by setting the parameters 'by.x = "DAUID"' and 'by.y = "GEOUID"', we tell the function to georeference each observation using its unique Dissemenation area ID and Geo ID. This filters each observation into its appropriate polygon in the shapefile. 
-
-After our files are merged into one, we can create a new object that is a subset of just values in St.John's by referencing the city name column. 
+With our census data cleaned and correctly labeled, we can now merge it with the census tract map. We will use the 'merge()' function. The parameters 'by.x = "DAUID"' and 'by.y = "GEOUID"' tell the function to georeference each observation using its unique Dissemination area ID and Geo ID. This filters each observation into its appropriate polygon in the shapefile. After our files are merged into one, we can create a new object that is a subset of just values in St.John's by referencing the city name column 'census_DAs$CMNAME'. 
 
 ```{r Clean data, echo=TRUE, eval=TRUE, warning=FALSE}
 #New column names
@@ -98,21 +94,21 @@ Municp <- subset(census_DAs, census_DAs$CMANAME == "St. John's")
 #Convert to rate
 Municp$PercFrench <- (Municp$`French Knowledge`/Municp$`Language Sample Size`)*100
 ```
-talk about:
-Remove polygons with N/a values
+Continuing with our data cleaning and setup, The 'French Knowledge' variable is currently just a simple count per area. To make it easier to interpret our results, we will want to create a new column that provides the percentage of french speakers per area. To do this we can write a simple percentage calculation using pre-existing fields.
+
+Finally, the last step in our data processing and cleaning is to create specific objects for our two variables of interest, making sure to remove any NA values that could potentially interfere with or skew our analysis later on. 
 
 ```{r NA Remove, echo=TRUE, eval=TRUE, warning=FALSE}
-#Remove Income NA
+#Remove Income NA Values
 Income_noNA <- Municp[which(!is.na(Municp$`Median total income`)),]
 
-#Remove French NA
+#Remove French NA Values
 French_noNA <- Municp[which(!is.na(Municp$`PercFrench`)),]
 
 ```
 
-We are interested in: median total income, percent of respondants who speak french
-calculating descriptive statistics:
 
+With our datasets ready to go, we can now calculate some basic descriptive statistics for both Income and French Knowledge. Descriptive statistics are an important metric understand the shape of our distribution. We will calculate the mean, standard deviation, and skewness for each variable. These all have their own fairly straightforward functions in R as seen below. We will also display these results in a table using the 'kable' function from the 'knitr' package. However, to do this we will need to create a dataframe of our results, defining which results fall in each column, and how many digits to round to. This can then easily be displayed with 'kable' along with an appropriate caption (Table 1). 
 
 ```{r DescriptiveStats, echo=TRUE, eval=TRUE, warning=FALSE}
 
@@ -135,8 +131,12 @@ data <- data.frame(Variable = c("Income", "French Language"),
 #Produce table
 kable(data, caption = paste0("Descriptive statistics for selected ", 2016, " census variables"))
 ```
+Table 1:
 
-Describe how the map is created.
+
+
+
+To help gain a better understanding of the spatial distribution of our data, we will now map our two variables of interest. To map in r, 
 
 ```{r StudyArea, echo=TRUE, eval=TRUE, warning=FALSE, fig.cap="St. John's census dissemination areas showing median total income (left) and percentage of respondants with knowledge of french (right)."}
 #Choose a pallete
