@@ -3,10 +3,18 @@
 
 ## Introduction
 
-Intro - talk about spatial analysis and autocorrelation in r
+This tutorial will walk you through performing a spatial autocorrelation analysis using R.
 
-Describe the concept of libraries.
+For context, spatial autocorrelation (SAC) is a metric used in spatial analysis to describe the relationship between an object and the distribution of nearby features (Gedamu et. al., 2024). Similar to other spatial analysis techniques, it aims to determine if a distribution of data is clustered, dispersed or random. Positive SAC refers to the tendency of features that are close together to have similar attributes. In this case, the result would be a clustered distribution. Conversely, negative SAC would refer to nearby features being dissimilar from each other, resulting in a dispersed distribution. Below is a visual example of SAC. 
 
+IMAGE
+Figure 1: Visual depiction of spatial autocorrelation created by ESRI n.d.
+
+The presence of SAC can have important implications for spatial analysis. While there are multiple ways to quantify SAC, we will be using a technique called Moran's I. This is a statistical measure which will give us a concrete, standardized value to make an appropriate conclusion about the presence of SAC, or lack thereof. For this exercise, we will be examining census data from 2016 in the St. John's area. Although census tract data can provide a wealth of different information, we will be focusing on two variables: Income, and respondents with knowledge of the French Language. Our objective will be to determine whether SAC is present in St. John's for our selected variables. Census data is ideal for this type of analysis, as positive SAC is often found when examining data pertaining to demographics (Li et al., 2012). It is often an appropriate choice because??????? 
+
+Our first step is to install the appropriate packages for this analysis. Packages are sets of additional functions and commands that can be installed through r onto your machine. These can allow you to broaden the scope of your analysis, or create better maps and figures. Each package that you install can be called into use through the library function. Libraries are the tool that allows you to call on and utilize the functions in the package. 
+
+To ensure all steps of this code function properly, install the following packages if not already installed: 
 ```{r Libraries, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 #Install packages:
 #install.packages("knitr")
