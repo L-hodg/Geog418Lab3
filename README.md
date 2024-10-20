@@ -7,15 +7,13 @@ This tutorial will walk you through performing a spatial autocorrelation analysi
 
 For context, spatial autocorrelation (SAC) is a metric used in spatial analysis to describe the relationship between an object and the distribution of nearby features (Gedamu et. al., 2024). Similar to other spatial analysis techniques, it aims to determine if a distribution of data is clustered, dispersed or random. Positive SAC refers to the tendency of features that are close together to have similar attributes. In this case, the result would be a clustered distribution. Conversely, negative SAC would refer to nearby features being dissimilar from each other, resulting in a dispersed distribution. Below is a visual example of SAC. 
 
-
-
+<img width="544" alt="Screenshot 2024-10-19 at 5 21 43 PM" src="https://github.com/user-attachments/assets/3bbbbc4f-8dfb-425e-bd89-7c8152c21201">
 
 Figure 1: Visual depiction of spatial autocorrelation created by ESRI n.d.
 
 The presence of SAC can have important implications for spatial analysis. While there are multiple ways to quantify SAC, we will be using a technique called Moran's I. This is a statistical measure which will give us a concrete, standardized value to make an appropriate conclusion about the presence of SAC, or lack thereof. For this exercise, we will be examining census data from 2016 in the St. John's area. Although census tract data can provide a wealth of different information, we will be focusing on two variables: Median total income, and respondents with knowledge of the french language. When looking at income, it is important to use the median as results can be skewed by the extremely wealthy. Our objective will be to determine whether SAC is present in St. John's for our selected variables. Census data is ideal for this type of analysis, as positive SAC is often found when examining data pertaining to demographics (Li et al., 2012). It is often an appropriate choice because??????? 
 
-Our first step is to install the appropriate packages for this analysis. Packages are sets of additional functions and commands that can be <img width="544" alt="Screenshot 2024-10-19 at 5 21 43 PM" src="https://github.com/user-attachments/assets/20d2e9ce-4f51-4ac5-81d3-88fa480048a0">
-<img width="544" alt="Screenshot 2024-10-19 at 5 21 43 PM" src="https://github.com/user-attachments/assets/3bbbbc4f-8dfb-425e-bd89-7c8152c21201">
+Our first step is to install the appropriate packages for this analysis. Packages are sets of additional functions and commands that can be 
 installed through r onto your machine. These can allow you to broaden the scope of your analysis, or create better maps and figures. Each package that you install can be called into use through the library function. Libraries are the tool that allows you to call on and utilize the functions in the package. 
 
 To ensure all steps of this code function properly, install the following packages if not already installed: 
@@ -131,12 +129,22 @@ data <- data.frame(Variable = c("Income", "French Language"),
 #Produce table
 kable(data, caption = paste0("Descriptive statistics for selected ", 2016, " census variables"))
 ```
-Table 1:
+<img width="504" alt="Screenshot 2024-10-20 at 4 39 10 PM" src="https://github.com/user-attachments/assets/aefcbe42-b5f7-4e5e-984b-33acfb9c966c">
 
 
 
 
-To help gain a better understanding of the spatial distribution of our data, we will now map our two variables of interest. To map in r, 
+
+To help gain a better understanding of the spatial distribution of our data, we will now map our two variables of interest. There are a couple different ways to map in R, in this instance we will use the 'tmap' package. The shape/extent of the map is defined by 'tm_shape()' by inputting the object of interest. 'tm_polygons()' defines how the polygons appear on the map. This function has a couple key elements:
+'col' - selects the column of interest within the object (eg. Median total income)
+'title' - Sets the title of the map
+'style' - Refers to the reclassification scheme used to assign color pallete. In our case we will use Natural breaks (Jenks) as it will define the most appropriate groups in the data and likely provide the best map output given the distribution of the data. 
+'pallete' - Selects the color pallete of the map. You can use the pallete explorer listed below to view options. 
+'border.alpha' - Defines the transparency of the borders between polygons. For our purposes we want a value of zero (fully transparent). 
+'colorNA' - Defines the color of NA values on the map, should there be any.
+
+
+Finally, 'tm_layout()' will let us adjust the position of the legend. 
 
 ```{r StudyArea, echo=TRUE, eval=TRUE, warning=FALSE, fig.cap="St. John's census dissemination areas showing median total income (left) and percentage of respondants with knowledge of french (right)."}
 #Choose a pallete
@@ -165,10 +173,17 @@ map_French <- tm_shape(French_noNA) +
 #Print maps side by side
 tmap_arrange(map_Income, map_French, ncol = 2, nrow = 1)
 ```
+To print the both maps in a figure side by side (Figure 2) you can use 'tm_arrange'. 
+
+<img width="775" alt="Screenshot 2024-10-20 at 4 38 06 PM" src="https://github.com/user-attachments/assets/b82fc73a-01ff-4830-8423-15e004f2dc02">
+
+Figure 2: Maps depicting Median Total Income (left), and Percentage of Correspondants with French Knowledge (right).
+
 
 ## Neighbourhood matrix
 
 Describe the concept of a weighted neighbourhood matrix.
+
 
 The code to create a list of neighbours in R uses the poly2nb() function in the ‘spdep’ package. 
 
