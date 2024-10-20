@@ -35,13 +35,13 @@ library("e1071")
 library("sf")
 
 ```
-Now that we’ve installed the proper packages, we can read in our data. In general, when working in R file organization is highly important. It is a good idea to have any files/datasets you will be using in one folder. You can then set this folder as your working directory using the setwd(“folder address on your computer”) function, as seen below. A working directory acts as a home base for your project. R will look for files you call, and save any outputs you may create using your working directory.
+Now that we’ve installed the proper packages, we can read in our data. In general, when working in R file organization is highly important. It is a good idea to have any files/datasets you will be using in one folder. You can then set this folder as your working directory using the 'setwd(“folder address on your computer”)' function, as seen below. A working directory acts as a home base for your project. R will look for files you call, and save any outputs you may create using your working directory.
 
 For this analysis we will be using a .csv file containing the 2016 census attribute data. 
 You can read the csv easily using the read.csv() function. While this file has all the required information about our selected variables across each census tract, it does not have any spatial coordinates, meaning we cannot map this file alone. 
-The second file is an .shp file containing census tract boundaries. For this file, the st_read() function will be used. This will serve as the spatial component we need for this analysis to continue. 
+The second file is an .shp file containing census tract boundaries. For this file, the 'st_read()' function will be used. This will serve as the spatial component we need for this analysis to continue. 
 
-It is important to consider that the extent of both these datasets concerns all of Canada. Since we will be focusing our analysis on the city of St. John's, it is important to set an appropriate projection. This will ensure that our map outputs generate without any unwanted distortion. To do this we will create a new dataframe for our spatial data, and use the st_transform() function to change the projection of our shp file. The Coordinate Reference System (CRS) we will be using is CRS:3761, which is a specific NAD83 projection for Newfoundland & Labrador.
+It is important to consider that the extent of both these datasets concerns all of Canada. Since we will be focusing our analysis on the city of St. John's, it is important to set an appropriate projection. This will ensure that our map outputs generate without any unwanted distortion. To do this we will create a new dataframe for our spatial data, and use the 'st_transform()' function to change the projection of our shapefile. The Coordinate Reference System (CRS) we will be using is CRS:3761, which is a specific NAD83 projection for Newfoundland & Labrador.
 
 ```{r Read in data, echo=TRUE, eval=TRUE, warning=FALSE}
 #Set Working Directory 
@@ -62,6 +62,13 @@ discuss/explain:
 - subset for st johns
 - turn absolute count data into a rate/percent
 
+This next chunk of code will focus on cleaning data, merging the .csv and the spatial data, and subsetting the extent to St. Johns. Currently the census data does not have informative column names, making it hard to identify and call on certain variables. To remedy this, make a new object containing a list of column names (ensure these are in the correct order). We can then apply this list to our csv by setting 'colnames(csv)' equal to the list. 
+
+Census data is unique in that each observation is complete with a GEOUID. This number essentially ties the obsersvation to a specific census tract location. We will create an additional column 'len' using 'nchar()', which counts the number of characters per ID. Using '$' after an object name allows you to reference a specific column. We will see more of this later. Observations with less than 8 characters are missing a dissemenation area, making them incomplete. These will be removed by subsetting our csv to only include rows where 'len' is equal to 8.
+
+Now that our census data has been cleaned and correctly labelled, we can merge it with the census tract map. We will use 'merge()' function. by setting the parameters 'by.x = "DAUID"' and 'by.y = "GEOUID"', we tell the function to georeference each observation using its unique Dissemenation area ID and Geo ID. This filters each observation into its appropriate polygon in the shapefile. 
+
+After our files are merged into one, we can create a new object that is a subset of just values in St.John's by referencing the city name column. 
 
 ```{r Clean data, echo=TRUE, eval=TRUE, warning=FALSE}
 #New column names
@@ -73,7 +80,7 @@ cols <- c("GEO UID", "Province code", "Province name", "CD code",
 #Apply those names to dataframe
 colnames(csv) <- cols
 
-#Add column to count number of ID charactors
+#Add column to count number of ID characters
 csv$len <- nchar(csv$`GEO UID`)
 
 #Remove IDs with less than 8 numbers
