@@ -11,7 +11,9 @@ For context, spatial autocorrelation (SAC) is a metric used in spatial analysis 
 
 Figure 1: Visual depiction of spatial autocorrelation created by ESRI n.d.
 
-The presence of SAC can have important implications for spatial analysis. While there are multiple ways to quantify SAC, we will be using a technique called Moran's I. This is a statistical measure which will give us a concrete, standardized value to make an appropriate conclusion about the presence of SAC, or lack thereof. For this exercise, we will be examining census data from 2016 in the St. John's area. Although census tract data can provide a wealth of different information, we will be focusing on two variables: Median total income, and respondents with knowledge of the french language. When looking at income, it is important to use the median as results can be skewed by the extremely wealthy. Our objective will be to determine whether SAC is present in St. John's for our selected variables. Census data is ideal for this type of analysis, as positive SAC is often found when examining data pertaining to demographics (Li et al., 2012). It is often an appropriate choice because??????? 
+The presence of SAC can have important implications for spatial analysis. While there are multiple ways to quantify SAC, we will be using a technique called Moran's I. This is a statistical measure which will give us a concrete, standardized value to make an appropriate conclusion about the presence of SAC, or lack thereof. For this exercise, we will be examining census data from 2016 in the St. John's area. Although census tract data can provide a wealth of different information, we will be focusing on two variables: Median total income, and respondents with knowledge of the french language. When looking at income, it is important to use the median as the mean can be skewed by the extremely wealthy. Our objective will be to determine whether SAC is present in St. John's for our selected variables. Census data is ideal for this type of analysis, as positive SAC is often found when examining data pertaining to demographics (Li et al., 2012). It is often an appropriate choice because??????? 
+
+These are both important variables to examine from a census point of view, as??
 
 Our first step is to install the appropriate packages for this analysis. Packages are sets of additional functions and commands that can be 
 installed through r onto your machine. These can allow you to broaden the scope of your analysis, or create better maps and figures. Each package that you install can be called into use through the library function. Libraries are the tool that allows you to call on and utilize the functions in the package. 
@@ -43,7 +45,7 @@ For this analysis we will be using a .csv file containing the 2016 census attrib
 You can read the csv easily using the read.csv() function. While this file has all the required information about our selected variables across each census tract, it does not have any spatial coordinates, meaning we cannot map this file alone. 
 The second file is an .shp file containing census tract boundaries. For this file, the 'st_read()' function from the 'sf' package will be used. This will serve as the spatial component we need for this analysis to continue. 
 
-It is important to consider that the extent of both these datasets concerns all of Canada. Since we will be focusing our analysis on the city of St. John's, it is important to set an appropriate projection. This will ensure that our map outputs generate without any unwanted distortion. To do this we will create a new object for our spatial data, and use the 'st_transform()' function from 'sf' to change the projection of our shapefile. The Coordinate Reference System (CRS) we will be using is CRS:3761, which is a specific NAD83 projection for Newfoundland & Labrador.
+It is important to consider that the extent of both these datasets concerns all of Canada. Since we will be focusing our analysis on the city of St. John's, it is important to set an appropriate projection. This will ensure that our map outputs generate without any unwanted distortion. To do this we will create a new dataframe for our spatial data, and use the 'st_transform()' function from 'sf' to change the projection of our shapefile. The Coordinate Reference System (CRS) we will be using is CRS:3761, which is a specific NAD83 projection for Newfoundland & Labrador.
 
 ```{r Read in data, echo=TRUE, eval=TRUE, warning=FALSE}
 #Set Working Directory 
@@ -58,14 +60,14 @@ stjohns = st_transform(shp, crs=3761)
 
 ```
 
-This next chunk of code will focus on cleaning data, merging the .csv and the spatial data, and subsetting the extent to St. Johns. Currently the census data does not have informative column names, making it hard to identify and call on certain variables. To remedy this, make a new object containing a list of column names (ensure these are in the correct order). We can then apply this list to our csv by setting 'colnames(csv)' equal to the list. 
+This next chunk of code will focus on cleaning data, merging the .csv and the spatial data, and subsetting the extent to St. Johns. Currently the census data does not have informative column names, making it hard to identify and call on certain variables. To remedy this, make a new dataframe containing a list of column names (ensure these are in the correct order). We can then apply this list to our csv by setting 'colnames(csv)' equal to the list. 
 
-Census data is unique in that each observation is complete with a GEOUID. This number essentially ties the observation to a specific census tract location. We will create an additional column 'len' using 'nchar()', which counts the number of characters per ID. Using '$' after an object name allows you to reference a specific column. We will see more of this later. Observations with less than 8 characters are missing a dissemination area, making them incomplete. These will be removed by subsetting our csv to only include rows where 'len' is equal to 8.
+Census data is unique in that each observation is complete with a GEOUID. This number essentially ties the observation to a specific census tract location. We will create an additional column 'len' using 'nchar()', which counts the number of characters per ID. Using '$' after an object/dataframe name allows you to reference a specific column. We will see more of this later. Observations with less than 8 characters are missing a dissemination area, making them incomplete. These will be removed by subsetting our csv to only include rows where 'len' is equal to 8.
 
 With our census data cleaned and correctly labeled, we can now merge it with the census tract map. We will use the 'merge()' function. The parameters 'by.x = "DAUID"' and 'by.y = "GEOUID"' tell the function to georeference each observation using its unique Dissemination area ID and Geo ID. This filters each observation into its appropriate polygon in the shapefile. After our files are merged into one, we can create a new object that is a subset of just values in St.John's by referencing the city name column 'census_DAs$CMNAME'. 
 
 ```{r Clean data, echo=TRUE, eval=TRUE, warning=FALSE}
-#New column names
+#New column names for csv
 cols <- c("GEO UID", "Province code", "Province name", "CD code",
         "CD name", "DA name", "Population", "Land area", 
         "Median total income", "Income Sample Size", "French Knowledge", 
@@ -89,7 +91,7 @@ census_DAs <- merge(stjohns, csv_clean,
 #Subset for St. John's
 Municp <- subset(census_DAs, census_DAs$CMANAME == "St. John's")
 
-#Convert to rate
+#Convert to Percentage
 Municp$PercFrench <- (Municp$`French Knowledge`/Municp$`Language Sample Size`)*100
 ```
 Continuing with our data cleaning and setup, The 'French Knowledge' variable is currently just a simple count per area. To make it easier to interpret our results, we will want to create a new column that provides the percentage of french speakers per area. To do this we can write a simple percentage calculation using pre-existing fields.
@@ -106,27 +108,27 @@ French_noNA <- Municp[which(!is.na(Municp$`PercFrench`)),]
 ```
 
 
-With our datasets ready to go, we can now calculate some basic descriptive statistics for both Income and French Knowledge. Descriptive statistics are an important metric understand the shape of our distribution. We will calculate the mean, standard deviation, and skewness for each variable. These all have their own fairly straightforward functions in R as seen below. We will also display these results in a table using the 'kable' function from the 'knitr' package. However, to do this we will need to create a dataframe of our results, defining which results fall in each column, and how many digits to round to. This can then easily be displayed with 'kable' along with an appropriate caption (Table 1). 
+With our datasets ready to go, we can now calculate some basic descriptive statistics for both Income and French Knowledge. Descriptive statistics are an important metric to understand the shape of our distribution. We will calculate the mean, standard deviation, and skewness for each variable. These all have their own fairly straightforward functions in R as seen below. We will also display these results in a table using the 'kable' function from the 'knitr' package. However, to do this we will need to create a dataframe of our results, defining which results fall in each column, and how many digits to round to. This can then easily be displayed with 'kable' along with an appropriate caption (Table 1). 
 
 ```{r DescriptiveStats, echo=TRUE, eval=TRUE, warning=FALSE}
 
-#Calculate descriptive stats for Income
+#Calculating descriptive stats for Income
 meanIncome <- mean(Income_noNA$`Median total income`)
 stdevIncome <- sd(Income_noNA$`Median total income`)
 skewIncome <- skewness(Income_noNA$`Median total income`)
 
-#Calculate descriptive stats for French
+#Calculating descriptive stats for French
 meanFrench <- mean(French_noNA$`PercFrench`)
 stdevFrench <- sd(French_noNA$`PercFrench`)
 skewFrench <- skewness(French_noNA$`PercFrench`)
 
-#Create dataframe for display in table
+#Create a dataframe for display in table, specify how many digits of rounding
 data <- data.frame(Variable = c("Income", "French Language"),
                    Mean = c(round(meanIncome,2), round(meanFrench,2)),
                    StandardDeviation = c(round(stdevIncome,2), round(stdevFrench,2)),
                    Skewness = c(round(skewIncome,2), round(skewFrench,2)))
 
-#Produce table
+#Produce table with kable
 kable(data, caption = paste0("Descriptive statistics for selected ", 2016, " census variables"))
 ```
 <img width="504" alt="Screenshot 2024-10-20 at 4 39 10 PM" src="https://github.com/user-attachments/assets/aefcbe42-b5f7-4e5e-984b-33acfb9c966c">
@@ -135,22 +137,28 @@ kable(data, caption = paste0("Descriptive statistics for selected ", 2016, " cen
 
 
 
-To help gain a better understanding of the spatial distribution of our data, we will now map our two variables of interest. There are a couple different ways to map in R, in this instance we will use the 'tmap' package. The shape/extent of the map is defined by 'tm_shape()' by inputting the object of interest. 'tm_polygons()' defines how the polygons appear on the map. This function has a couple key elements:
-'col' - selects the column of interest within the object (eg. Median total income)
+To help gain a better understanding of the spatial distribution of our data, we will now map our two variables of interest. There are a couple different ways to map in R, in this instance we will use the 'tmap' package. The shape/extent of the map is defined by 'tm_shape()' by inputting the dataframe of interest. 'tm_polygons()' defines how the polygons appear on the map. This function has a couple key elements:
+
+'col' - selects the column of interest within the dataframe (eg. Median total income)
+
 'title' - Sets the title of the map
-'style' - Refers to the reclassification scheme used to assign color pallete. In our case we will use Natural breaks (Jenks) as it will define the most appropriate groups in the data and likely provide the best map output given the distribution of the data. 
+
+'style' - Refers to the reclassification scheme used to assign a color to each polygon. In our case we will use Natural breaks (Jenks) as it will define the most appropriate groups in the data and likely provide the best map output given the distribution of the data. 
+
 'pallete' - Selects the color pallete of the map. You can use the pallete explorer listed below to view options. 
+
 'border.alpha' - Defines the transparency of the borders between polygons. For our purposes we want a value of zero (fully transparent). 
+
 'colorNA' - Defines the color of NA values on the map, should there be any.
 
 
 Finally, 'tm_layout()' will let us adjust the position of the legend. 
 
 ```{r StudyArea, echo=TRUE, eval=TRUE, warning=FALSE, fig.cap="St. John's census dissemination areas showing median total income (left) and percentage of respondants with knowledge of french (right)."}
-#Choose a pallete
+#Choose a pallete using this tool
 # tmaptools::palette_explorer() #Tool for selecting pallettes
 
-#Map median Income
+#Mapping median Income
 map_Income <- tm_shape(Income_noNA) + 
   tm_polygons(col = "Median total income", 
               title = "Median total income", 
@@ -160,7 +168,7 @@ map_Income <- tm_shape(Income_noNA) +
               colorNA = "grey") +
   tm_layout(legend.position = c("LEFT", "TOP"))
 
-#Map French Knowledge
+#Mapping French Knowledge
 map_French <- tm_shape(French_noNA) + 
   tm_polygons(col = "PercFrench", 
               title = "Percentage with \n French Knowledge", 
@@ -170,7 +178,7 @@ map_French <- tm_shape(French_noNA) +
               colorNA = "grey") +
   tm_layout(legend.position = c("LEFT", "TOP"))
 
-#Print maps side by side
+#Print maps side by side 
 tmap_arrange(map_Income, map_French, ncol = 2, nrow = 1)
 ```
 To print the both maps in a figure side by side (Figure 2) you can use 'tm_arrange'. 
