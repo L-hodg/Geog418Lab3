@@ -328,10 +328,10 @@ kable(MoransResults, caption = paste0("Moran's I Results"))
 ```
 <img width="392" alt="Screenshot 2024-10-20 at 10 29 14 PM" src="https://github.com/user-attachments/assets/d9519910-166b-4a19-8616-cd8c3b9417d5">
 
+Moran's I results (table 2) for both variables indicate a tendency towards positive SAC and spatial clustering. This is due to both values being greater than their respective EI values, which is the expected I value given a perfectly random distribution. Income appears to show a greater tendency towards clustering, which seems appropriate given how high income neighborhoods are often organized in cities. French knowledge is also appropriatley clustered, 
+as communities often form around lignuistic commonality. In both cases, further analysis is needed to determine the significance of this result. 
 
-Describe the results.
-
-
+We can also calclate the range of our Global Moran's I:
 ```{r Global Morans Range, echo=TRUE, eval=TRUE, warning=FALSE}
 #Function to calculate the range of global Moran's I
 moran.range <- function(lw) {
@@ -345,11 +345,10 @@ minRange <- range[1]
 maxRange <- range[2]
 ```
 
-Describe what the results indicate.
+The resulting min and max Morans I range for income were -0.67 and 1.06 respectivley. These results indicate a certain amount of variability in the dataset, as some areas appear highly clustered, while others show signs of dispersion. 
 
-However, we can still go a step further and figure out whether these patterns are statistically significant. To do so, we can use a Z-test. Here our null hypothesis is ?, and the alternate hypothesis is ?. Using an $\alpha$ value of 0.05, if our Z-score falls above or below 1.96, we can say ?. A value greater than +1.96 would imply ?, and a value less than -1.96 would imply ?.
-
-Although we now have an Indication of the spatial pattern, we still need to determine if this result is statistically significant. To do this we will perfom a simple Z-test. For this test we will use a 95% confidence level, indicating an $\alpha$ of 0.05. This level of significance produces a critical value of +/- 1.96. This means that any Z score greater than 1.96 would be significantly clustered, while values less than -1.96 would be significantly dispersed.
+Although we now have an Indication of the spatial pattern, we still need to determine if this result is statistically significant. To do this we will perfom a simple Z-test. In this case our Null hypothesis states that there is no SAC present within the data. While our alternate hypothesis states that positive SAC is present within the data for the selected variables. 
+For this test we will use a 95% confidence level, indicating an $\alpha$ of 0.05. This level of significance produces a critical value of +/- 1.96. This means that any Z score greater than 1.96 would be significantly clustered (positive SAC), while values less than -1.96 would be significantly dispersed (Negative SAC). Any values within this range would be considered insignificant, and randomly distributed.
 
 We can perform a Z-test as following:
 
@@ -360,20 +359,21 @@ zIncome <- (mIIncome - eIIncome) / (sqrt(varIncome))
 #Calculate z-test for French
 zFrench <- (mIFrench - eIFrench) / (sqrt(varFrench))
 ```
+<img width="288" alt="Screenshot 2024-10-20 at 10 55 55 PM" src="https://github.com/user-attachments/assets/7b934b56-bf35-4c86-a67c-07be9ae47cca">
 
-The zscores for both variable confirm that ?
+The resulting Z-scores for both variables (Table 3) indicate a very high degree of significance. This allows us to reject our null hypothesis, indcating significant spatial clustering for both variables. 
 
 ## Local spatial autocorrelation
 
-Explain local spatial autocorrelation
+Local spatial autocorrelation is fairly similar to global SAC. However, it analyzes each individual feature in the dataset and provides each with a unique result. This allows us to examine specific areas or even single features which may be exhibiting SAC. Local SAC is also referred to as LISA, an acronym for 'Local Indicators of Spatial Association'. To analyze Local SAC, we will use the Local Moran's I. 
 
-The calculation for Local Moran’s I has many of the same features as our global calculation, although arranged in a different way.
+Local Moran's I is a similar equation to its global counterpart, however it is slightly changed and rearranged as:
 
 ```math
 I_i = \frac{x_i - \bar{x}}{S_i^2}\sum{_{j=1}^n}W_{i,j}(x_j - \bar{x})\space \space where \space \space S_i^2 = \frac{\sum_{i=1}^n (x_i - \bar{x})^2}{n-1}
 ```
 
-Again, instead of typing out these calculations, we can use the localmoran() function to deal with all of the messy calculations for us, as long as we input our variable and weighting scheme.
+We can utilize the 'localmoran()' function to asses local SAC. 
 
 
 ```{r Local Morans I, echo=TRUE, eval=TRUE, warning=FALSE}
@@ -399,7 +399,13 @@ French_noNA$P<- lisa.testFrench [,5]
 ```
 
 
-Now going back to our basic mapping template we can visualize some of these results to understand what this test is doing.
+We can now map these results to visualize how certain areas exhibit SAC (Figure 5). 
+
+<img width="825" alt="Screenshot 2024-10-20 at 11 08 48 PM" src="https://github.com/user-attachments/assets/cbff077d-29d6-4f3e-9fcd-165ea851b58d"> 
+
+Figure 5: Visualization of Local Moran's I values
+
+
 
 
 ```{r MappingLocalMoransI, echo=TRUE, eval=TRUE, warning=FALSE, fig.cap="St. Johns census dissemination areas showing LISA z-scores for median total income (left) and percentage of respondants with knowledge of french (right)."}
