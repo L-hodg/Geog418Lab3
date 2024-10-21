@@ -1,13 +1,11 @@
 # Geography 418 Lab 3 
-
+Tutorial by Liam Hodgins
 
 ## Introduction
 
 This tutorial will walk you through performing a spatial autocorrelation analysis using R.
 
-Spatial autocorrelation (SAC) is a metric used in spatial analysis to describe the relationship between an object and the distribution of nearby features (Gedamu et. al., 2024). At its core, spatial autocorrelation is a function of Tobler's first law of Geography. This law describes the relationship between objects, stating that objects in close proximity to eachother will be more alike than those further away. Similarly SAC is concerned with how the variance between two points is affected as the distance between them changes. This can be described by the following graph:
-
-VARIOGRAM FIGURE?
+Spatial autocorrelation (SAC) is a metric used in spatial analysis to describe the relationship between an object and the distribution of nearby features (Gedamu et. al., 2024). At its core, spatial autocorrelation is a function of Tobler's first law of Geography. This law describes the relationship between objects, stating that objects in close proximity to eachother will be more alike than those further away. Similarly SAC is concerned with how the variance between two points is affected as the distance between them changes.
 
 Similar to other spatial analysis techniques, it aims to determine if a distribution of data is clustered, dispersed or random. Positive SAC refers to the tendency of features that are close together to have similar attributes. In this case, the result would be a clustered distribution. Conversely, negative SAC would refer to nearby features being dissimilar from each other, resulting in a dispersed distribution. Below is a visual example of SAC. 
 
@@ -16,15 +14,8 @@ Similar to other spatial analysis techniques, it aims to determine if a distribu
 Figure 1: Visual depiction of spatial autocorrelation created by and sourced from ESRI, n.d.
 
 
+The presence of SAC can have important implications for spatial analysis. While there are multiple ways to quantify SAC, we will be using a technique called Moran's I. This is a statistical measure which will give us a concrete, standardized value to make an appropriate conclusion about the presence of SAC, or lack thereof. For this exercise, we will be examining census data from 2016 in the St. John's area. Although census tract data can provide a wealth of different information, we will be focusing on two variables: Median total income, and respondents with knowledge of the french language. When looking at income, it is important to use the median as the mean can be skewed by the extremely wealthy. Our objective will be to determine whether SAC is present in St. John's for our selected variables. Census data is ideal for this type of analysis, as positive SAC is often found when examining data pertaining to demographics (Li et al., 2012). Cenus data is ideal for examining SAC, as it can inform many different socio-economic fields.
 
-
-
-
-The presence of SAC can have important implications for spatial analysis. While there are multiple ways to quantify SAC, we will be using a technique called Moran's I. This is a statistical measure which will give us a concrete, standardized value to make an appropriate conclusion about the presence of SAC, or lack thereof. For this exercise, we will be examining census data from 2016 in the St. John's area. Although census tract data can provide a wealth of different information, we will be focusing on two variables: Median total income, and respondents with knowledge of the french language. When looking at income, it is important to use the median as the mean can be skewed by the extremely wealthy. Our objective will be to determine whether SAC is present in St. John's for our selected variables. Census data is ideal for this type of analysis, as positive SAC is often found when examining data pertaining to demographics (Li et al., 2012). It is often an appropriate choice because??????? 
-
-These are both important variables to examine from a census point of view, as??
-
-Talk about the census data, get a reference!!
 
 Our first step is to install the appropriate packages for this analysis. Packages are sets of additional functions and commands that can be 
 installed through r onto your machine. These can allow you to broaden the scope of your analysis, or create better maps and figures. Each package that you install can be called into use through the library function. Libraries are the tool that allows you to call on and utilize the functions in the package. 
@@ -73,7 +64,7 @@ stjohns = st_transform(shp, crs=3761)
 
 This next chunk of code will focus on cleaning data, merging the .csv and the spatial data, and subsetting the extent to St. Johns. Currently the census data does not have informative column names, making it hard to identify and call on certain variables. To remedy this, make a new dataframe containing a list of column names (ensure these are in the correct order). We can then apply this list to our csv by setting 'colnames(csv)' equal to the list. 
 
-Census data is unique in that each observation is complete with a GEOUID. This number essentially ties the observation to a specific census tract location (Statcan. n.d). We will create an additional column 'len' using 'nchar()', which counts the number of characters per ID. Using '$' after an object/dataframe name allows you to reference a specific column. We will see more of this later. Observations with less than 8 characters are missing a dissemination area, making them incomplete. These will be removed by subsetting our csv to only include rows where 'len' is equal to 8.
+Census data is unique in that each observation is complete with a GEOUID. This number essentially ties the observation to a specific census tract location (Government of Canada,  2017). We will create an additional column 'len' using 'nchar()', which counts the number of characters per ID. Using '$' after an object/dataframe name allows you to reference a specific column. We will see more of this later. Observations with less than 8 characters are missing a dissemination area, making them incomplete. These will be removed by subsetting our csv to only include rows where 'len' is equal to 8.
 
 With our census data cleaned and correctly labeled, we can now merge it with the census tract map. We will use the 'merge()' function. The parameters 'by.x = "DAUID"' and 'by.y = "GEOUID"' tell the function to georeference each observation using its unique Dissemination area ID and Geo ID. This filters each observation into its appropriate polygon in the shapefile. After our files are merged into one, we can create a new object that is a subset of just values in St.John's by referencing the city name column 'census_DAs$CMNAME'. 
 
@@ -332,6 +323,7 @@ Moran's I results (table 2) for both variables indicate a tendency towards posit
 as communities often form around lignuistic commonality. In both cases, further analysis is needed to determine the significance of this result. 
 
 We can also calclate the range of our Global Moran's I:
+
 ```{r Global Morans Range, echo=TRUE, eval=TRUE, warning=FALSE}
 #Function to calculate the range of global Moran's I
 moran.range <- function(lw) {
@@ -347,7 +339,7 @@ maxRange <- range[2]
 
 The resulting min and max Morans I range for income were -0.67 and 1.06 respectivley. These results indicate a certain amount of variability in the dataset, as some areas appear highly clustered, while others show signs of dispersion. 
 
-Although we now have an Indication of the spatial pattern, we still need to determine if this result is statistically significant. To do this we will perfom a simple Z-test. In this case our Null hypothesis states that there is no SAC present within the data. While our alternate hypothesis states that positive SAC is present within the data for the selected variables. 
+Although we now have an Indication of the spatial pattern, we still need to determine if this result is statistically significant. To do this we will perform a simple Z-test. In this case our Null hypothesis states that there is no SAC present within the data. While our alternate hypothesis states that positive SAC is present within the data for the selected variables. 
 For this test we will use a 95% confidence level, indicating an $\alpha$ of 0.05. This level of significance produces a critical value of +/- 1.96. This means that any Z score greater than 1.96 would be significantly clustered (positive SAC), while values less than -1.96 would be significantly dispersed (Negative SAC). Any values within this range would be considered insignificant, and randomly distributed.
 
 We can perform a Z-test as following:
@@ -401,14 +393,6 @@ French_noNA$P<- lisa.testFrench [,5]
 
 We can now map these results to visualize how certain areas exhibit SAC (Figure 5). 
 
-<img width="781" alt="Screenshot 2024-10-20 at 11 12 26 PM" src="https://github.com/user-attachments/assets/b8d01d22-ba6e-4439-8e83-884049abcd2a">
-
-Figure 5: St. John's census tract areas depicting z-scores from LISA test for median total income (left) and percentage of respondants with knowledge of french (right).
-
-
-
-
-
 ```{r MappingLocalMoransI, echo=TRUE, eval=TRUE, warning=FALSE, fig.cap="St. Johns census dissemination areas showing LISA z-scores for median total income (left) and percentage of respondants with knowledge of french (right)."}
 #Map LISA z-scores for Income
 map_LISA_Income <- tm_shape(Income_noNA) +
@@ -443,10 +427,11 @@ tmap_arrange(map_LISA_Income, map_LISA_French, ncol = 2, nrow = 1)
 
 ```
 
-Explain the results.
+<img width="781" alt="Screenshot 2024-10-20 at 11 12 26 PM" src="https://github.com/user-attachments/assets/b8d01d22-ba6e-4439-8e83-884049abcd2a">
 
+Figure 5: St. John's census tract areas depicting z-scores from LISA test for median total income (left) and percentage of respondants with knowledge of french (right).
 
-While these maps are great for visualizing where the data is and getting a rough idea of how many polygons are significantly positively or negatively spatially autocorrelated, it can be even more informative to graph these trends.
+From these maps, we can see how there are only a handful of significantly clustered census tracts, and only one or two significantly dispersed areas. These figures provide a helpful guide as to where the hotspots of positive and negative SAC are within the data. However it can also be useful to visualize these scores on a graph:
 
 ```{r MoransIScatter, echo=TRUE, eval=TRUE, warning=FALSE, fig.cap= "Moran's I scatter plot for median total income."}
 #Create Moran's I scatter plot for Income
@@ -462,13 +447,32 @@ moran.plot(French_noNA$PercFrench, French.lw, zero.policy=TRUE, spChk=NULL, labe
 ```
 
 
-In these plots, the points with diamonds are considered statistically significant, and the regression line shows the overall trend. For both plots we can see that the trend shows?
+<img width="780" alt="Screenshot 2024-10-20 at 11 21 51 PM" src="https://github.com/user-attachments/assets/8b0870e2-af4e-45c4-90ea-5622f641e08e">
 
+Figure 6: Scatter plot of local Moran's I scores for median total income
+
+<img width="797" alt="Screenshot 2024-10-20 at 11 23 30 PM" src="https://github.com/user-attachments/assets/e0a22154-25e9-45fc-aa6e-fbb2e4b58f61">
+
+Figure 7: Scatter plot of local Moran's I scores for Percent of Respondants with French Knowledge.
+
+Both figure 6 and 7 show the distribution of values for each variable of interest. Points enclosed in a diamond are to be read as statistically significant. For median total income, we see the vast majority of points show little SAC, positive or negative. We also see the most significant points in the top right of the chart, indicating both the point and its neighbors had values high above the mean. 
+
+For French knowledge, interestingly we see the majority of points being slightly dispersed (negative SAC), however not enough to be significant. In this case, we also see most significant points to be positively spatially autocorrelated, likely because the mean is quite low. 
 
 
 
 ## Summary
 
-Provide a brief summary.
+During this exercise, we have performed a range of analyses from simple descriptive statistics, to more complex calculations of spatial autocorrelation like Global and local Moran's I. We also explored the ideas of Neighbors, weighting, and creating a weighted neighbor matrix. To visualize these analyses, we used a variety of techniques for mapping and table creation using packages like ‘tmap’ and ‘sf’. We also highlighted important skills such as data cleaning. Ideally, this tutorial has provided insight into how these techniques can be implemented using R for your own uses. In terms of the data itself, we examined 2016 census data in St. Johns and how our two variables: Median total income, and French Knowledge, exhibited spatial autocorrelation. It was found that both variables exhibited statistically significant positive SAC, indicative of spatial clustering.  
 
 ## References
+
+Gedamu, W. T., Plank-Wiedenbeck, U., & Wodajo, B. T. (2024). A spatial autocorrelation analysis of road traffic crash by severity using Moran’s I spatial statistics: A comparative study of Addis Ababa and Berlin cities. Accident Analysis & Prevention, 200, 107535. https://doi.org/10.1016/j.aap.2024.107535
+
+Government of Canada, S. C. (2017, November 15). Illustrated Glossary—Geographic code. https://www150.statcan.gc.ca/n1/pub/92-195-x/2016001/other-autre/geograph/code-eng.htm
+
+Li Li, Zhongbo Jiang, Ning Duan, Weishan Dong, Ke Hu, Wei Sun (2012). An Approach to Optimize Police Patrol Activities Based on the Spatial Pattern of Crime Hotspots Retrieved October 19, 2024, from https://www.sciencedirect.com/science/article/abs/pii/B9780123970374000089
+
+Moraga, P. (2023). Chapter 7 Spatial neighborhood matrices | Spatial Statistics for Data Science: Theory and Practice with R. https://www.paulamoraga.com/book-spatial/spatial-neighborhood-matrices.html
+
+ESRI - Spatial Autocorrelation (Global Moran’s I) (Spatial Statistics)—ArcGIS Pro | Documentation. (n.d). Retrieved October 19, 2024, from https://pro.arcgis.com/en/pro-app/latest/tool-reference/spatial-statistics/spatial-autocorrelation.htm
