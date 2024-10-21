@@ -259,9 +259,9 @@ IncomeBoth <- tm_shape(Income_noNA) + tm_borders(col='lightgrey') +
 tmap_arrange(IncomeQueen, IncomeRook, IncomeBoth, ncol = 3, nrow = 1)
 
 ```
-<img width="818" alt="Screenshot 2024-10-20 at 6 43 02 PM" src="https://github.com/user-attachments/assets/33803d79-607a-488c-805d-cb495ef57403">
+<img width="800" alt="Screenshot 2024-10-20 at 11 13 34 PM" src="https://github.com/user-attachments/assets/7708eab6-4fc8-4b66-9e71-71fa48f96991">
 
-Figure 4: Maps showing different weighting types. 
+Figure 4: St. John's census tracts showing median total income neighbours queens weight (left)  rooks weight (middle) and both (right).
 
 As seen above in figure 4 these maps show different neighbor weighting types, with each polygon drawing a line to each neighbor. While figures like this can be difficult to interpret, there are a few key takeaways. In both weighting schemes we can see there are areas of high and low frequency. There are also cases where polygons have no neighbors. This may affect the outcome of the SAC analysis, as certain areas may not be accounted for due to the selection of the weighting algorithm. Additionally, the smaller census tracts are seen to have far more connections than larger ones. This may also affect the outputs.  BECAUSE?
 
@@ -401,9 +401,10 @@ French_noNA$P<- lisa.testFrench [,5]
 
 We can now map these results to visualize how certain areas exhibit SAC (Figure 5). 
 
-<img width="825" alt="Screenshot 2024-10-20 at 11 08 48 PM" src="https://github.com/user-attachments/assets/cbff077d-29d6-4f3e-9fcd-165ea851b58d"> 
+<img width="781" alt="Screenshot 2024-10-20 at 11 12 26 PM" src="https://github.com/user-attachments/assets/b8d01d22-ba6e-4439-8e83-884049abcd2a">
 
-Figure 5: Visualization of Local Moran's I values
+Figure 5: St. John's census tract areas depicting z-scores from LISA test for median total income (left) and percentage of respondants with knowledge of french (right).
+
 
 
 
