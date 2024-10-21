@@ -227,7 +227,7 @@ crs(French.net2) <- crs(French_noNA)
 
 ```
 
-To map the aformentioned Income.net objects we will once again employ 'tmap'. There is no need to map both variables as they both use the same census tracts. In this instance, 'tm_shape()' is once again describing the shape/extent of the map, and 'tm_borders()' is defining border color. Since we are mapping two objects on one map, we use the '+' operator, and use 'tm_shape()' again to map our lines, this time with our .net object. To change the color and width of the lines, you can use 'tm_lines'. We will also make a combined map showing both weighting schemes using the '+' operator again. 
+To map the aforementioned Income.net objects we will once again employ 'tmap'. There is no need to map both variables as they both use the same census tracts. In this instance, 'tm_shape()' is once again describing the shape/extent of the map, and 'tm_borders()' is defining border color. Since we are mapping two objects on one map, we use the '+' operator, and use 'tm_shape()' again to map our lines, this time with our .net object. To change the color and width of the lines, you can use 'tm_lines'. We will also make a combined map showing both weighting schemes using the '+' operator again. 
 
 We can print these maps side by side using 'tmap_arrange()', setting the number of columns to 3. 
 
@@ -257,8 +257,8 @@ Figure 4: Maps showing different weighting types.
 
 As seen above in figure 4 these maps show different neighbor weighting types, with each polygon drawing a line to each neighbor. 
 
-describe code for weighted matrix file
-- and how a weight matrix works
+
+We will now create a weight matrix for each of our variables to be used in further anlaysis. To do this in R, we will use the "nb2listw()" function from "spdep". This function will use the list of neighbours previously made, however it will also create a list of assigned weights for each neighbor. The process for how weights are assigned is dependant on the chosen 'style'. This refers to the type of weighting scheme. This function has several options..
 
 Weights are defined by “style” (ie. type), and can include “B”, “W”, and “C”. The B weights matrix is the most basic of the three, as it employs a binary weighting scheme, whereby each neighbour is given a weight of 1, and all other polygons are given a weight of 0 (see figures above). A W weights matrix employs a row standardized weighting scheme, with each neighbour given equal weights that sum to 1 [11]. Comparatively, a C weights matrix is a globally standardized method of weighting, with all neighbours given equal weight across the entire study area [13].
 
