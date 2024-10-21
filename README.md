@@ -1,4 +1,4 @@
-# Geog418Lab3
+# Geography 418 Lab 3 
 
 
 ## Introduction
@@ -258,7 +258,7 @@ Figure 4: Maps showing different weighting types.
 As seen above in figure 4 these maps show different neighbor weighting types, with each polygon drawing a line to each neighbor. 
 
 
-We will now create a weight matrix for each of our variables to be used in further anlaysis. To do this in R, we will use the "nb2listw()" function from "spdep". This function will use the list of neighbours previously made, however it will also create a list of assigned weights for each neighbor. The process for how weights are assigned is dependant on the chosen 'style'. This refers to the type of weighting scheme. This function has several weighting options, for example "B" or "W". Type "B" is simple binary coding, where neighbors are assigned a value of 1, and all others 0. Type "W" implies the weighting scheme is row standardized, meaning the weights of all neighbors linked to a feature are equally given and sum to 1. For our purposes we will be using type "W". Another important parameter for this function is 'zero.policy()'. This accounts for the possibility that a feature has no neighbors. If set to FALSE, the program will recognize such a feature as an error and stop the program. Since we do not want this, we will set zero.polic as TRUE, and it will assign a value of zero to any feature with no neighbors.  
+We will now create a weight matrix for each of our variables to be used in further anlaysis. To do this in R, we will use the "nb2listw()" function from "spdep". This function will use the list of neighbours previously made, however it will also create a list of assigned weights for each neighbor. The process for how weights are assigned is dependant on the chosen 'style'. This refers to the type of weighting scheme. This function has several weighting options, for example "B" or "W". Type "B" is simple binary coding, where neighbors are assigned a value of 1, and all others 0. Type "W" implies the weighting scheme is row standardized, meaning the weights of all neighbors linked to a feature are equally given and sum to 1. For our purposes we will be using type "W". Another important parameter for this function is 'zero.policy()'. This accounts for the possibility that a feature has no neighbors. If set to FALSE, the program will recognize such a feature as an error and stop the program. Since we do not want this, we will set zero.policy as TRUE, and it will assign a value of zero to any feature with no neighbors.  
 
 ```{r Final weights, echo=TRUE, eval=TRUE, warning=FALSE}
 #Create Income weights matrix
