@@ -9,11 +9,13 @@ For context, spatial autocorrelation (SAC) is a metric used in spatial analysis 
 
 <img width="544" alt="Screenshot 2024-10-19 at 5 21 43 PM" src="https://github.com/user-attachments/assets/3bbbbc4f-8dfb-425e-bd89-7c8152c21201">
 
-Figure 1: Visual depiction of spatial autocorrelation created by ESRI n.d.
+Figure 1: Visual depiction of spatial autocorrelation created by and sourced from ESRI, n.d.
 
 The presence of SAC can have important implications for spatial analysis. While there are multiple ways to quantify SAC, we will be using a technique called Moran's I. This is a statistical measure which will give us a concrete, standardized value to make an appropriate conclusion about the presence of SAC, or lack thereof. For this exercise, we will be examining census data from 2016 in the St. John's area. Although census tract data can provide a wealth of different information, we will be focusing on two variables: Median total income, and respondents with knowledge of the french language. When looking at income, it is important to use the median as the mean can be skewed by the extremely wealthy. Our objective will be to determine whether SAC is present in St. John's for our selected variables. Census data is ideal for this type of analysis, as positive SAC is often found when examining data pertaining to demographics (Li et al., 2012). It is often an appropriate choice because??????? 
 
 These are both important variables to examine from a census point of view, as??
+
+Talk about the census data, get a reference!!
 
 Our first step is to install the appropriate packages for this analysis. Packages are sets of additional functions and commands that can be 
 installed through r onto your machine. These can allow you to broaden the scope of your analysis, or create better maps and figures. Each package that you install can be called into use through the library function. Libraries are the tool that allows you to call on and utilize the functions in the package. 
@@ -62,7 +64,7 @@ stjohns = st_transform(shp, crs=3761)
 
 This next chunk of code will focus on cleaning data, merging the .csv and the spatial data, and subsetting the extent to St. Johns. Currently the census data does not have informative column names, making it hard to identify and call on certain variables. To remedy this, make a new dataframe containing a list of column names (ensure these are in the correct order). We can then apply this list to our csv by setting 'colnames(csv)' equal to the list. 
 
-Census data is unique in that each observation is complete with a GEOUID. This number essentially ties the observation to a specific census tract location. We will create an additional column 'len' using 'nchar()', which counts the number of characters per ID. Using '$' after an object/dataframe name allows you to reference a specific column. We will see more of this later. Observations with less than 8 characters are missing a dissemination area, making them incomplete. These will be removed by subsetting our csv to only include rows where 'len' is equal to 8.
+Census data is unique in that each observation is complete with a GEOUID. This number essentially ties the observation to a specific census tract location (Statcan. n.d). We will create an additional column 'len' using 'nchar()', which counts the number of characters per ID. Using '$' after an object/dataframe name allows you to reference a specific column. We will see more of this later. Observations with less than 8 characters are missing a dissemination area, making them incomplete. These will be removed by subsetting our csv to only include rows where 'len' is equal to 8.
 
 With our census data cleaned and correctly labeled, we can now merge it with the census tract map. We will use the 'merge()' function. The parameters 'by.x = "DAUID"' and 'by.y = "GEOUID"' tell the function to georeference each observation using its unique Dissemination area ID and Geo ID. This filters each observation into its appropriate polygon in the shapefile. After our files are merged into one, we can create a new object that is a subset of just values in St.John's by referencing the city name column 'census_DAs$CMNAME'. 
 
@@ -190,7 +192,11 @@ Figure 2: Maps depicting Median Total Income (left), and Percentage of Correspon
 
 ## Neighbourhood matrix
 
-Describe the concept of a weighted neighbourhood matrix.
+In order to conduct our Moran’s i analysis, R requires information about the location of ‘neighbors’ across the data, and how they are defined. To do this, a weighted neighborhood matrix is needed. A weighted neighborhood matrix is a file that defines the spatial neighborhood of each feature (*i*) across a dataset (Moraga, 2023). The spatial neighborhood is then used to define the weight (w<sub>*ij*</sub>)  of every other feature (*j*) relative to *i*, creating a matrix. Both the spatial neighborhood, and how weights are assigned is based on the chosen weighting scheme. For this analysis we will focus on two types of weights: Rook, and Queen (Figure 3). These weighting schemes are named after chess pieces, delineating which directions adjacent features will be considered as a neighbor. Rook Weight considers features directly adjacent only on vertical and horizontal planes. Queen weighting does the same, but also adds features that are diagonally adjacent. In both cases, features considered neighbors are given a binary weight value of 1, while all other points receive 0. 
+
+<img width="568" alt="Screenshot 2024-10-20 at 5 52 42 PM" src="https://github.com/user-attachments/assets/3195f0f7-06d6-40b0-824d-fff6891535a3">
+
+Figure 3: Visual guide to Rook and Queen weighting. Figure created by and sourced from Moraga, 2023.  
 
 
 The code to create a list of neighbours in R uses the poly2nb() function in the ‘spdep’ package. 
