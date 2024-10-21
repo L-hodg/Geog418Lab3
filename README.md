@@ -5,11 +5,20 @@
 
 This tutorial will walk you through performing a spatial autocorrelation analysis using R.
 
-For context, spatial autocorrelation (SAC) is a metric used in spatial analysis to describe the relationship between an object and the distribution of nearby features (Gedamu et. al., 2024). Similar to other spatial analysis techniques, it aims to determine if a distribution of data is clustered, dispersed or random. Positive SAC refers to the tendency of features that are close together to have similar attributes. In this case, the result would be a clustered distribution. Conversely, negative SAC would refer to nearby features being dissimilar from each other, resulting in a dispersed distribution. Below is a visual example of SAC. 
+For context, spatial autocorrelation (SAC) is a metric used in spatial analysis to describe the relationship between an object and the distribution of nearby features (Gedamu et. al., 2024). At its core, spatial autocorrelation is a function of Tobler's first law of Geography. This law describes the relationship between objects, stating that objects in close proximity to eachother will be more alike than those further away. Similarly SAC is concerned with how the variance between two points is affected as the distance between them changes. This can be described by the following graph:
+
+VARIOGRAM FIGURE?
+
+Similar to other spatial analysis techniques, it aims to determine if a distribution of data is clustered, dispersed or random. Positive SAC refers to the tendency of features that are close together to have similar attributes. In this case, the result would be a clustered distribution. Conversely, negative SAC would refer to nearby features being dissimilar from each other, resulting in a dispersed distribution. Below is a visual example of SAC. 
 
 <img width="544" alt="Screenshot 2024-10-19 at 5 21 43 PM" src="https://github.com/user-attachments/assets/3bbbbc4f-8dfb-425e-bd89-7c8152c21201">
 
 Figure 1: Visual depiction of spatial autocorrelation created by and sourced from ESRI, n.d.
+
+
+
+
+
 
 The presence of SAC can have important implications for spatial analysis. While there are multiple ways to quantify SAC, we will be using a technique called Moran's I. This is a statistical measure which will give us a concrete, standardized value to make an appropriate conclusion about the presence of SAC, or lack thereof. For this exercise, we will be examining census data from 2016 in the St. John's area. Although census tract data can provide a wealth of different information, we will be focusing on two variables: Median total income, and respondents with knowledge of the french language. When looking at income, it is important to use the median as the mean can be skewed by the extremely wealthy. Our objective will be to determine whether SAC is present in St. John's for our selected variables. Census data is ideal for this type of analysis, as positive SAC is often found when examining data pertaining to demographics (Li et al., 2012). It is often an appropriate choice because??????? 
 
@@ -138,7 +147,6 @@ kable(data, caption = paste0("Descriptive statistics for selected ", 2016, " cen
 
 
 
-
 To help gain a better understanding of the spatial distribution of our data, we will now map our two variables of interest. There are a couple different ways to map in R, in this instance we will use the 'tmap' package. The shape/extent of the map is defined by 'tm_shape()' by inputting the dataframe of interest. 'tm_polygons()' defines how the polygons appear on the map. This function has a couple key elements:
 
 'col' - selects the column of interest within the dataframe (eg. Median total income)
@@ -255,10 +263,12 @@ tmap_arrange(IncomeQueen, IncomeRook, IncomeBoth, ncol = 3, nrow = 1)
 
 Figure 4: Maps showing different weighting types. 
 
-As seen above in figure 4 these maps show different neighbor weighting types, with each polygon drawing a line to each neighbor. 
+As seen above in figure 4 these maps show different neighbor weighting types, with each polygon drawing a line to each neighbor. While figures like this can be difficult to interpret, there are a few key takeaways. In both weighting schemes we can see there are areas of high and low frequency. There are also cases where polygons have no neighbors. This may affect the outcome of the SAC analysis, as certain areas may not be accounted for due to the selection of the weighting algorithm. Additionally, the smaller census tracts are seen to have far more connections than larger ones. This may also affect the outputs.  BECAUSE?
 
 
-We will now create a weight matrix for each of our variables to be used in further anlaysis. To do this in R, we will use the "nb2listw()" function from "spdep". This function will use the list of neighbours previously made, however it will also create a list of assigned weights for each neighbor. The process for how weights are assigned is dependant on the chosen 'style'. This refers to the type of weighting scheme. This function has several weighting options, for example "B" or "W". Type "B" is simple binary coding, where neighbors are assigned a value of 1, and all others 0. Type "W" implies the weighting scheme is row standardized, meaning the weights of all neighbors linked to a feature are equally given and sum to 1. For our purposes we will be using type "W". Another important parameter for this function is 'zero.policy()'. This accounts for the possibility that a feature has no neighbors. If set to FALSE, the program will recognize such a feature as an error and stop the program. Since we do not want this, we will set zero.policy as TRUE, and it will assign a value of zero to any feature with no neighbors.  
+We will now create a weight matrix for each of our variables to be used in further analysis. To do this in R, we will use the "nb2listw()" function from "spdep". This function will use the list of neighbours previously made using Queens weighting, however it will also create a list of assigned weights for each neighbor. The process for how weights are assigned is dependant on the chosen 'style'. This refers to the type of weighting scheme. This function has several weighting options, for example "B" or "W". Type "B" is simple binary coding, where neighbors are assigned a value of 1, and all others 0. Type "W" implies the weighting scheme is row standardized, meaning the weights of all neighbors linked to a feature are equally given and sum to 1. For our purposes we will be using type "W". Another important parameter for this function is 'zero.policy()'. This accounts for the possibility that a feature has no neighbors. If set to FALSE, the program will recognize such a feature as an error and stop the program. Since we do not want this, we will set zero.policy as TRUE, and it will assign a value of zero to any feature with no neighbors.  
+
+You can view the first few values of this file using 'head()'. 
 
 ```{r Final weights, echo=TRUE, eval=TRUE, warning=FALSE}
 #Create Income weights matrix
@@ -274,7 +284,10 @@ head(Income.lw[["weights"]])[c(1:3)]
 
 ## Global Moran’s I
 
-Intro to morans I
+The global Moran’s I is a commonly used statistic in spatial analysis fields for assessing SAC. Simply, it provides a standardized value between -1 and 1 which serves as an indication of the spatial distribution of points in relation to each other. This is a global statistic, as it uses all points to generate a single value to represent the whole dataset. 
+Generally, values greater than 0 tend towards a spatially clustered distribution, while values less than 0 tend towards dispersion. Moran’s I can be calculated as:
+
+
 Equation:
 
 $$
