@@ -5,7 +5,7 @@
 
 This tutorial will walk you through performing a spatial autocorrelation analysis using R.
 
-For context, spatial autocorrelation (SAC) is a metric used in spatial analysis to describe the relationship between an object and the distribution of nearby features (Gedamu et. al., 2024). At its core, spatial autocorrelation is a function of Tobler's first law of Geography. This law describes the relationship between objects, stating that objects in close proximity to eachother will be more alike than those further away. Similarly SAC is concerned with how the variance between two points is affected as the distance between them changes. This can be described by the following graph:
+Spatial autocorrelation (SAC) is a metric used in spatial analysis to describe the relationship between an object and the distribution of nearby features (Gedamu et. al., 2024). At its core, spatial autocorrelation is a function of Tobler's first law of Geography. This law describes the relationship between objects, stating that objects in close proximity to eachother will be more alike than those further away. Similarly SAC is concerned with how the variance between two points is affected as the distance between them changes. This can be described by the following graph:
 
 VARIOGRAM FIGURE?
 
@@ -284,7 +284,7 @@ head(Income.lw[["weights"]])[c(1:3)]
 
 ## Global Moran’s I
 
-The global Moran’s I is a commonly used statistic in spatial analysis fields for assessing SAC. Simply, it provides a standardized value between -1 and 1 which serves as an indication of the spatial distribution of points in relation to each other. This is a global statistic, as it uses all points to generate a single value to represent the whole dataset. 
+The Global Moran’s I is a commonly used statistic in spatial analysis fields for assessing SAC. Simply, it provides a standardized value between -1 and 1 which serves as an indication of the spatial distribution of points in relation to each other. This is a global statistic, as it uses all points to generate a single value to represent the whole dataset. 
 Generally, values greater than 0 tend towards a spatially clustered distribution, while values less than 0 tend towards dispersion. Moran’s I can be calculated as:
 
 
@@ -294,10 +294,10 @@ $$
 I = \frac{\sum_{i=1}^n\sum_{j=1}^nW_{i,j}(x_i - \bar{x})(x_j - \bar{x})}{(\sum_{i=1}^n\sum_{j=1}^nW_{i,j})\sum_{i=1}^n(x_i - \bar{x})^2}
 $$
 
-Here, if $x$ is the variable being assessed, $x_i$ is the variable value at a point of interest (i) and $x_j$ represents a neighbour to $x_i$ (here determined by the queen weighting scheme). The spatial weighting applied to the weighting matrix $W_{i,j}$ is multiplied by both the differences of $x_i$ and the mean value of variable $x$, and $x_j$ and the mean value of variable $x$.
 
-The denominator in this case is used to standardize our values, and therefore relatively high values of I correspond with positive spatial autocorrelation, and relatively low values of I correspond with negative spatial autocorrelation. Remember that the global Moran’s I statistic provides an indication of how spatially autocorrelated our data is over the entire dataset, thus representing a spatial pattern at the global scale [15].
+In this equation $i$ would be the point of interest, while $j$ would be a singular neighbor to point $i$. $x$ serves as the attribute of interest, and therefore $x$<sub>i</sub> or $x$<sub>j</sub> would be the value of that attribute at those points. The numerator of this equation functions to sum the differences between $x$<sub>i</sub> and the mean of $x$, and $x$<sub>j</sub> and the mean of $x$. It then runs these points through the weighting matrix, $W$<sub>i,j</sub>, which we made previously. Since a formula like this is highly dependent on point density, the denominator acts to standardize the output. This gives us an indication of spatial autocorrelation across the whoel dataset, however separate tests are required to determine the significance of this value. 
 
+We can now calculate Global Moran's I using out weight matrix:
 
 ```{r Global Morans I, echo=TRUE, eval=TRUE, warning=FALSE}
 #Calculate Global Moran's I for Income
@@ -315,7 +315,18 @@ miFrench <- moran.test(French_noNA$PercFrench, French.lw, zero.policy = TRUE)
 mIFrench <- miFrench$estimate[[1]]
 eIFrench <- miFrench$estimate[[2]]
 varFrench <- miFrench$estimate[[3]]
+
+#Put Results in Table
+
+MoransResults = data.frame(Variable = c("Income", "French Language"),
+                   MoransI = c(round(mIIncome,2), round(mIFrench,2)),
+                   EI = c(round(eIIncome,4), round(eIFrench,4)),
+                   Var = c(round(varIncome,4), round(varFrench,4)))
+
+#Produce table
+kable(MoransResults, caption = paste0("Moran's I Results"))
 ```
+<img width="392" alt="Screenshot 2024-10-20 at 10 29 14 PM" src="https://github.com/user-attachments/assets/d9519910-166b-4a19-8616-cd8c3b9417d5">
 
 
 Describe the results.
@@ -338,7 +349,9 @@ Describe what the results indicate.
 
 However, we can still go a step further and figure out whether these patterns are statistically significant. To do so, we can use a Z-test. Here our null hypothesis is ?, and the alternate hypothesis is ?. Using an $\alpha$ value of 0.05, if our Z-score falls above or below 1.96, we can say ?. A value greater than +1.96 would imply ?, and a value less than -1.96 would imply ?.
 
-We can calculate a Z-test using the following code:
+Although we now have an Indication of the spatial pattern, we still need to determine if this result is statistically significant. To do this we will perfom a simple Z-test. For this test we will use a 95% confidence level, indicating an $\alpha$ of 0.05. This level of significance produces a critical value of +/- 1.96. This means that any Z score greater than 1.96 would be significantly clustered, while values less than -1.96 would be significantly dispersed.
+
+We can perform a Z-test as following:
 
 ```{r Global Morans ZScore, echo=TRUE, eval=TRUE, warning=FALSE}
 #Calculate z-test for Income
