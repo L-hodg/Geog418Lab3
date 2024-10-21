@@ -198,16 +198,15 @@ In order to conduct our Moran’s i analysis, R requires information about the l
 
 Figure 3: Visual guide to Rook and Queen weighting. Figure created by and sourced from Moraga, 2023.  
 
+We will now generate a list of neighbours for each of our datasets. To do this, we can use the 'poly2nb()' function from the ‘spdep’ package. This function works to build a list of neighbours for each polygon within the dataset given that they have defined borders. The function assumes queen weighting, so when we perform our rook weights we must add 'queen=FALSE'.
 
-The code to create a list of neighbours in R uses the poly2nb() function in the ‘spdep’ package. 
-
-changing from rook neighbors to queen: change: ‘queen = TRUE’ to ‘queen = FALSE’.
+Here we also create Income.net and French.net objects using 'nb2lines()'. This function creates vector lines between each feature and their neighbors. We will use this later to map how each polygon relates to eachother. 
 
 ```{r Neighbours, echo=TRUE, eval=TRUE, warning=FALSE}
 
 #Income Neighbours - Queens weight
 Income.nb <- poly2nb(Income_noNA)
-# Use st_coordinates to get the coordinates
+# Use st_coordinates to get the coordinates, st_centroid places the reference coordinate in the center of each polygon
 Income.net <- nb2lines(Income.nb, coords=st_coordinates(st_centroid(Income_noNA)))
 
 
